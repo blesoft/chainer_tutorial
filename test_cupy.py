@@ -69,3 +69,27 @@ for N in [10,100,1000,10000]:
     x = cp.random.rand(N,N)
     t = cp.random.rand(N,1)
     # GPU 上での処理が終わるまでの待機
+    cp.cuda.Stream.null.synchronize()
+    time_start = time.time()
+    # - - - 処理 - - - #
+    w = get_w_np(x,t)
+    # - - - -  - - - - #
+    cp.cuda.Stream.null.synchronize
+    time_end = time.time()
+    # 経過時間
+    elapsed_time = time_end - time_start
+    print('N={:>5}:{:8.5f}sec'.format(N,elapsed_time))
+    times_cpu.append(elapsed_time)
+
+import tabulate
+# N 毎の実行時間の差
+N = [10,100,1000,10000]
+times_cpu = np.asarray(times_cpu)
+times_gpu = np.asarray(times_gpu)
+ratio = ['{:2f}x'.format(r) for r in times_cpu / times_gpu]
+
+# tabulate を用いてテーブルを作成
+table = tabulate.tabulate(
+    zip(N,times_cpu,times_gpu,ratio),
+    headers=['N','NumPyでの実行時間(sec)','CuPyでの実行時間(sec)','高速化倍率'])
+print(table)
