@@ -112,3 +112,24 @@ plt.plot(results_train['accuracy'],label='train')
 plt.plot(results_valid['accuracy'],label='valid')
 plt.legend()
 plt.show()
+
+# テストデータを用いた評価
+with chainer.using_config('train',False),chainer.using_config('enable_backprop',False):
+    y_test = net(x_test)
+accuracy_test = F.accuracy(y_test,t_test)
+print(accuracy_test.array)
+
+chainer.serializers.save_npz('my_iris.net',net)
+
+# 訓練住みネットワークを用いた推論
+loaded_net = Sequential(
+    L.Linear(n_input,n_hidden),F.relu,
+    L.Linear(n_hidden,n_hidden),F.relu,
+    L.Linear(n_hidden,n_output)
+)
+chainer.serializers.load_npz('my_iris.net',loaded_net)
+
+with chainer.using_config('train',False),chainer.using_config('enable_backprop',False):
+    y_test = loaded_net(x_test)
+
+print(np.argmax(y_test[0,:].array))
